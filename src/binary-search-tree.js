@@ -6,41 +6,245 @@ const { NotImplementedError } = require('../extensions/index.js');
 * Implement simple binary search tree according to task description
 * using Node from extensions
 */
+class Node {
+	constructor(data) {
+    this.data = data; 
+		this.left = null;
+		this.rigth = null;
+  }
+}
+
 class BinarySearchTree {
+	constructor() {
+    // создаем бинарное дерево поиска (дерево пусто, значит корень = null)
+    // ссылка на корень бинарного дерева
+    this.rootNode = null; 
+  }
 
   root() {
-    throw new NotImplementedError('Not implemented');
-    // remove line with error and write your code here
+    // возвращаем корень бинарного дерева
+    return this.rootNode;
   }
 
-  add(/* data */) {
-    throw new NotImplementedError('Not implemented');
-    // remove line with error and write your code here
+  add(data) {
+    // добавляем новый узел (используем рекурсивные функции (вызывают сами себя))
+    // ложим в корень (или узел) то, что вернет функция addNodes 
+    this.rootNode = addNodes(this.rootNode, data)
+
+    // Функция addNodes добавляет в дерево некое значение
+    // Метод addNodes будет проходить по всем существующим узлам и 
+    // когда дойдем до пустого места мы добавим новый узел (ПРОВЕРКА 1)
+    // который будет либо левый либо правый потомок для сущ. узла (ПРОВЕРКА 3)
+    function addNodes(node, data) {
+      // ПРОВЕРКА 1. Если мы попали в узел, которого нет (null) то...
+      // т.е. мы дошли до узла от которого нам нужно идти влево или вправо, но там больше нет узлов
+      if (!node) {
+        // !!!!!! добавляем новый узел
+        return new Node(data);
+      }
+
+      // ПРОВЕРКА 2. Если такой узел уже существует
+      // т.е. значения существующего и добавляемого узла существуют
+      if (node.data === data) {
+        // просто возвращаем текущий узел (ничего не добавляем)
+        return node;
+      }
+
+      // ПРОВЕРКА 3. ВАЖНАЯ
+      // Если значение меньше, чем в текущем узле
+      if (data < node.data) {
+        // значит левый потомок будет тот, который вернет метод addNodes
+        // т.е. к левому потомку ляжет либо новый узел (ПРОВЕРКА 1)
+        // либо самого себя (ПРОВЕРКА 2)
+        // либо снова вызовим метод addNodes с другим корнем (узлом)
+        // Ссылка на левого потомка
+        node.left = addNodes(node.left, data);
+      } else {
+        // иначе правый потомок будет тот, который вернет метод addNodes
+        node.rigth = addNodes(node.rigth, data);
+      }
+
+      // После проверок мы возвращаем текущий узел
+      return node;
+    }
   }
 
-  has(/* data */) {
-    throw new NotImplementedError('Not implemented');
-    // remove line with error and write your code here
+  has(data) {
+  // немного повторяет метод add(), так же используем рекурсию
+    // начинаем поиск с корня this.rootNode и указываем, что ищем -> data
+    return searchNodes(this.rootNode, data)
+
+    // Функция поиска
+    function searchNodes(node, data) {
+      // ПРОВЕРКА 1. шли по существующим узлам, но искомого узла не оказалось
+      if (!node) {
+        return false;
+      }
+
+      // ПРОВЕРКА 2. шли по существующим узлам, нашли искомый узел
+      if (node.data === data) {
+        return true;
+      }
+
+      // Если не выполняется оба предыдущих условия
+      // т.е. узел есть, но значение узла не равняется искомому узлу
+      // ПРОВЕРКА 3. Если значение искомого узла меньше, чем в этом узле
+      if (data < node.data) {
+        // тогда мы ищем внутри левого узла
+        return searchNodes(node.left, data);
+      } else {
+        // иначе будем искать внутри правого узла
+        return searchNodes(node.rigth, data);
+      }
+    // итого: мы опять пройдем по дереву 
+    // проверим есть ли вообще узел (ПРОВЕРКА 1)
+    // проверим равен ли существующий узел искомому (ПРОВЕРКА 2)
+    // если не равен, то снова попробуем пройти влево или вправо (ПРОВЕРКА 3)
+    }
   }
 
-  find(/* data */) {
-    throw new NotImplementedError('Not implemented');
-    // remove line with error and write your code here
+  find(data) {
+    // начинаем поиск с корня this.rootNode и указываем, что ищем - data
+    return findNodes(this.rootNode, data)
+
+    // Функция поиска
+    function findNodes(node, data) {
+      // ПРОВЕРКА 1. шли по существующим узлам, но искомого узла не оказалось
+      if (!node) {
+        return null;
+      }
+
+      // ПРОВЕРКА 2. шли по существующим узлам, нашли искомый узел
+      if (node.data === data) {
+        return node;
+      }
+
+      // Если не выполняется оба предыдущих условия
+      // т.е. узел есть, но значение узла не равняется искомому узлу
+      // ПРОВЕРКА 3. Если значение искомого узла меньше, чем в этом узле
+      if (data < node.data) {
+        // тогда мы ищем внутри левого узла
+        return findNodes(node.left, data);
+      } else {
+        // иначе будем искать внутри правого узла
+        return findNodes(node.rigth, data);
+      }   
+    }
   }
 
-  remove(/* data */) {
-    throw new NotImplementedError('Not implemented');
-    // remove line with error and write your code here
+  remove(data) {
+    // вкладываем в rootNode то, что получится после проверки всех условий
+    // т.е. удаляем какой узел this.rootNode и с каким значением (data)
+    this.rootNode = removeNodes(this.rootNode, data);
+
+    function removeNodes(node, data) {
+      // если не было узла (был null), то null и оставляем
+      if (!node) {
+        // !!!! это точка остановки рекурсии
+        return null;
+      }
+
+      // Далее определяем куда нам пойти
+      // Если искомое значение меньше, чем значение в текущем узле
+      if (data < node.data) {
+        // мы идем в левый узел
+        // и удаляем из левого поддерева искомое значение (data)
+        // и новое дерево, полученное после удаления положить в переменную node.left 
+        // т.е. в левом подереве будет результат без удаленного элемента
+        node.left = removeNodes(node.left, data);
+        // возращаем текущий узел наверх, что бы положить его в корень дерева
+        return node;
+      }
+        
+      if (data > node.data) {
+        // иначе, если искомое значение больше, чем в текущем узле
+        // выполняем тоже самое для правого поддерева
+        // т.е. обновляем правое поддерево
+        node.rigth = removeNodes(node.rigth, data);
+        // возращаем правое поддерево (уже обновленное)
+        return node;
+      } 
+      
+      if (data === node.data) {
+        // если не сработали предыдущие условия то:
+        // проверяем ВАРИАНТ 1 является ли текущий узел ЛИСТОМ
+        // У листа нет поддеревьев, он последний элемент
+        if (!node.left && !node.rigth) {
+          // мы можем такой элемент безопасно удалить и вернуть вместо него null
+          return null;
+        }
+
+        // проверяем ВАРИАНТ 2 на отсутствие одного из потомков (левого)
+        if (!node.left) {
+          // мы удаляем наш элемент, а правое поддерево перемещаем наверх
+          node = node.rigth;
+          return node;
+        }
+        // проверяем на отсутствие одного из потомков (правого)
+        if (!node.rigth) {
+          // мы удаляем наш элемент, а левое поддерево перемещаем наверх
+          node = node.left;
+          return node;
+        }
+
+        // ВАРИАНТ 3. Есть оба поддерева
+        // Необходимо искать минимальное значение у правого поддерева
+        // либо можно искать максимальное значение у левого поддерева
+        // Начинаем с корня правого поддерева и идем постоянно левее (там min значения)
+        let minRigthNode = node.rigth;
+        // пока слева есть елемент, мы идем к нему
+        while (minRigthNode.left) {
+          minRigthNode = minRigthNode.left;
+        }
+        // как только найдено мин значение, мы его помещаем в значение удаляемого узла -> node.data
+        node.data = minRigthNode.data;
+        // удаляем узел с минимальным значением из правого поддерева
+        // обновляем правое поддерево в соответствии с тем что вернет removeNode
+        node.rigth = removeNodes(node.rigth, minRigthNode.data);
+        // возращаем текущий узел, он по рекурсии поднимится вверх и так произойдет для всех его предков по дереву до корня
+        return node;
+      }
+    }
   }
 
   min() {
-    throw new NotImplementedError('Not implemented');
-    // remove line with error and write your code here
+  // найти минимальный элемент
+    // проверяем есть ли вообще узлы
+    if (!this.rootNode) {
+      // корня дерева нет, возвращать нечего
+      return;
+    }
+		let node = this.rootNode;
+    // ищем самый мин элемент начиная с корня
+    // есть ли пока еще меньший узел
+    while (node.left) {
+      // нашли самый левый элемент (самый минимальный)
+      node = node.left;
+    }
+
+    // останавили цикл while и возращаем значение самого левого элемента
+    return node.data;
   }
 
   max() {
-    throw new NotImplementedError('Not implemented');
-    // remove line with error and write your code here
+  // найти максимальный элемент
+    // проверяем есть ли вообще узлы
+    if (!this.rootNode) {
+      // корня дерева нет, возвращать нечего
+      return;
+    }
+
+    // объявляем переменную для обхода
+    let node = this.rootNode;
+    // ищем самый максимальный элемент начиная с корня
+    // есть ли пока еще больший узел
+    while (node.rigth) {
+      // нашли самый правый элемент (самый максимальный)
+      node = node.rigth;
+    }
+
+    // останавили цикл while и возращаем значение самого правого элемента
+    return node.data;
   }
 }
 
